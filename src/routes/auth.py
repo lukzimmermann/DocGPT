@@ -1,15 +1,15 @@
 from flask import Blueprint, request
 import bcrypt
+import psycopg2
 import postgres
 
 auth_bp = Blueprint('auth', __name__)
 
 
-@auth_bp.route('/login')
+@auth_bp.route('/login', methods=['POST'])
 def login():
     data = request.json
-
-    username = data.get('mailAddress')
+    username = data.get('email')
     password = data.get('password')
 
     pg = postgres.PostgresDB()
@@ -17,24 +17,32 @@ def login():
 
     data = (username,)
     response = pg.selectQuery("""
-                   SELECT *
+                   SELECT pass
                    FROM users
                    WHERE email = %s
                    """, data)
-
     pg.disconnect()
 
-    if bcrypt.checkpw(password.encode('utf-8'), response[0][2].encode('utf-8')):
-        return 'Login page'
-    else:
-        return 'wrong username or password'
+
+    if response:
+        stored_hash = response[0][0]
+
+        new_hash = bcrypt.hashpw(password.encode('utf-8'), stored_hash.encode('utf-8'))
+        print(stored_hash)
+        print(new_hash.decode('utf-8'))
+
+
+        if new_hash.decode('utf-8') == stored_hash:
+            return 'Login successful'
+    
+    return 'Wrong username or password'
 
 
 @auth_bp.route('/create')
 def create():
     data = request.json
 
-    username = data.get('mailAddress')
+    email = data.get('email')
     password = data.get('password')
 
     salt = bcrypt.gensalt()
@@ -43,17 +51,19 @@ def create():
     pg = postgres.PostgresDB()
     pg.connect()
 
-    data = (username, hashedPassword)
+    data = (email, hashedPassword.decode('utf-8'))
+
+    print(hashedPassword.decode('utf-8'))
 
     pg.executeQuery("""
                     INSERT INTO users
-                    (email, password_hash)
+                    (email, pass)
                     VALUES (%s, %s)
                     """, data)
 
     pg.disconnect()
 
-    return 'Logout page'
+    return 'Create'
 
 
 @auth_bp.route('/logout')
