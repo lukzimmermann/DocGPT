@@ -1,4 +1,4 @@
-from flask import Blueprint, request
+from flask import Blueprint, request, jsonify
 import bcrypt
 import psycopg2
 import postgres
@@ -23,19 +23,20 @@ def login():
                    """, data)
     pg.disconnect()
 
-
-    if response:
+    if response and len(response) == 1:
         stored_hash = response[0][0]
+        hash = bcrypt.hashpw(password.encode('utf-8'), stored_hash.encode('utf-8'))
 
-        new_hash = bcrypt.hashpw(password.encode('utf-8'), stored_hash.encode('utf-8'))
-        print(stored_hash)
-        print(new_hash.decode('utf-8'))
-
-
-        if new_hash.decode('utf-8') == stored_hash:
-            return 'Login successful'
+        if hash.decode('utf-8') == stored_hash:
+            response_message = {
+                "message": "Login successful."
+                }
+            return jsonify(response_message), 200
     
-    return 'Wrong username or password'
+
+    response_message = {"message": "Wrong username or password"}
+    return jsonify(response_message), 401
+
 
 
 @auth_bp.route('/create')
@@ -52,8 +53,6 @@ def create():
     pg.connect()
 
     data = (email, hashedPassword.decode('utf-8'))
-
-    print(hashedPassword.decode('utf-8'))
 
     pg.executeQuery("""
                     INSERT INTO users

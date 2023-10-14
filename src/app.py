@@ -1,5 +1,5 @@
 from flask import Flask
-from routes.auth import auth_bp
+from routes.auth.auth_controller import auth_bp
 from routes.chat import chat_bp
 
 app = Flask(__name__)
