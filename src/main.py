@@ -13,11 +13,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 app.include_router(auth.router)
 
 
-@app.get("/")
-async def root():
-    return {"message": "Hello World"}
-
-@app.get("/items/")
+@app.get("/test/", tags=["Test Endpoint"])
 async def read_items(token: Annotated[str, Depends(oauth2_scheme)]):
     user = verify_jwt_token(token)
     return {"user": user}

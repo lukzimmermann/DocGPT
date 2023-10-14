@@ -29,6 +29,28 @@ def is_valid_user_and_password(email: str, password:str) -> bool:
     
     return False
 
+def create_new_account(email: str, password: str) -> None:
+    try:
+        salt = bcrypt.gensalt()
+        hashedPassword = bcrypt.hashpw(password.encode('utf-8'), salt)
+
+        pg = postgres.PostgresDB()
+        pg.connect()
+
+        data = (email, hashedPassword.decode('utf-8'))
+
+        pg.executeQuery("""
+                        INSERT INTO users
+                        (email, pass)
+                        VALUES (%s, %s)
+                        """, data)
+
+        pg.disconnect()
+    except:
+        HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, 
+            detail="Internal server error")
+
 def create_jwt_token(email: str) -> str:
     payload = {
         "email": email,
@@ -40,8 +62,7 @@ def verify_jwt_token(token: str) -> str:
     try:
         payload = jwt.decode(token, os.getenv("JWT_SECRET"), algorithms="HS256")
         expire_time = payload.get('exp')
-        print(datetime.fromtimestamp(expire_time))
-        print(datetime.utcnow())
+
         if expire_time > datetime.utcnow().timestamp():
             return payload.get('email')
         else:

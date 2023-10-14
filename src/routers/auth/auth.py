@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel
-from routers.auth.authService import create_jwt_token, is_valid_user_and_password
+from routers.auth.authService import create_jwt_token, create_new_account, is_valid_user_and_password
 
 router = APIRouter()
 
@@ -23,6 +23,8 @@ class Token(BaseModel):
     message: str
     token: str
 
+class Message(BaseModel):
+    message: str
 
 @router.post("/login/", tags=["Auth"])
 async def login(data: Credential) -> Token:
@@ -34,13 +36,7 @@ async def login(data: Credential) -> Token:
 
 
 @router.post("/createAccount/", tags=["Auth"])
-async def create_account(data: Credential) -> Token:
-    if is_valid_user_and_password(data.email, data.password):
-        token = create_jwt_token(data.email)
-        return {"message": "login successful", "token": token}
-    else:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, 
-            detail="Wrong username or password")
-    
+async def create_account(data: Credential) -> Message:
+    create_new_account(data.email, data.password)
+    return {"message": "create account successfully"}
 
