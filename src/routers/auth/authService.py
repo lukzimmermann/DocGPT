@@ -1,12 +1,16 @@
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
 from fastapi import HTTPException, status
+from routers.auth.tokenHandler import TokenHandler
 import postgres
 import bcrypt
 import jwt
 import os
 
+
 load_dotenv()
+
+token_handler = TokenHandler()
 
 def is_valid_user_and_password(email: str, password:str) -> bool:
     pg = postgres.PostgresDB()
@@ -54,12 +58,14 @@ def create_new_account(email: str, password: str) -> None:
 def create_jwt_token(email: str) -> str:
     payload = {
         "email": email,
-        "exp": datetime.utcnow() + timedelta(seconds=30)
+        "exp": datetime.utcnow() + timedelta(hours=24)
     }
     return jwt.encode(payload, os.getenv("JWT_SECRET"), algorithm='HS256')
 
 def verify_jwt_token(token: str) -> str:
     try:
+        if not token_handler.is_token_active(token):
+            raise
         payload = jwt.decode(token, os.getenv("JWT_SECRET"), algorithms="HS256")
         expire_time = payload.get('exp')
 

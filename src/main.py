@@ -6,11 +6,14 @@ from routers.auth import auth
 from routers.auth import auth
 from routers.auth.authService import verify_jwt_token
 
+
 app = FastAPI()
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 app.include_router(auth.router)
+
+
 
 
 @app.get("/test/", tags=["Test Endpoint"])
