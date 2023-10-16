@@ -2,6 +2,8 @@ CREATE TABLE users (
 	id SERIAL,
 	email TEXT PRIMARY KEY,
 	pass TEXT,
-	salt TEXT,
-	last_login TIMESTAMP
+	last_login TIMESTAMP,
+	is_verified BOOLEAN,
+	is_active BOOLEAN,
+	is_admin BOOLEAN
 );
