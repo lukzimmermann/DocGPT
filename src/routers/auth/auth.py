@@ -1,11 +1,15 @@
 from fastapi import APIRouter, HTTPException, status
+from fastapi.requests import HTTPConnection
+from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 from routers.auth.authService import create_jwt_token, create_new_account, is_user_verified, is_valid_user_and_password
 from routers.auth.tokenHandler import TokenHandler
+from routers.auth.verificationHandler import VerificationHandler
 
 router = APIRouter()
 
 token_handler = TokenHandler()
+verification_handler = VerificationHandler()
 
 class Credential(BaseModel):
     email: str
@@ -48,8 +52,12 @@ async def logout(data: Token):
     token_handler.delete_token(data.token)
     return {"message": "logout successfully"}
 
-@router.post("/createAccount/", tags=["Auth"])
+@router.post("/createAccount/", tags=["Auth"], status_code=201)
 async def create_account(data: Credential):
-    response = create_new_account(data.email, data.password)
-    return response
+    create_new_account(data.email, data.password)
+    verification_handler.send_verification(data.email)
+    return {"message": "create account successfully"}
 
+@router.get("/verification/{token}", tags=["Auth"], response_class=HTMLResponse)
+async def verification(token):
+    return verification_handler.verify_email(token)
