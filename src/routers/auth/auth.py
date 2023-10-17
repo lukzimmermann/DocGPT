@@ -6,7 +6,7 @@ from routers.auth.authService import create_jwt_token, create_new_account, is_us
 from routers.auth.tokenHandler import TokenHandler
 from routers.auth.verificationHandler import VerificationHandler
 
-router = APIRouter()
+router = APIRouter(prefix="/auth", tags=["Authentification"])
 
 token_handler = TokenHandler()
 verification_handler = VerificationHandler()
@@ -32,7 +32,7 @@ class Token(BaseModel):
 class Message(BaseModel):
     message: str
 
-@router.post("/login/", tags=["Auth"])
+@router.post("/login/", tags=["Authentification"])
 async def login(data: Credential):
 
     if not is_user_verified(data.email):
@@ -47,17 +47,17 @@ async def login(data: Credential):
     else:
         raise HTTPException(status_code=401, detail="Wrong username or password")
 
-@router.post("/logout/", tags=["Auth"])
+@router.post("/logout/", tags=["Authentification"])
 async def logout(data: Token):
     token_handler.delete_token(data.token)
     return {"message": "logout successfully"}
 
-@router.post("/createAccount/", tags=["Auth"], status_code=201)
+@router.post("/createAccount/", tags=["Authentification"], status_code=201)
 async def create_account(data: Credential):
     create_new_account(data.email, data.password)
     verification_handler.send_verification(data.email)
     return {"message": "create account successfully"}
 
-@router.get("/verification/{token}", tags=["Auth"], response_class=HTMLResponse)
+@router.get("/verification/{token}", tags=["Authentification"], response_class=HTMLResponse)
 async def verification(token):
     return verification_handler.verify_email(token)

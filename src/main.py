@@ -6,8 +6,11 @@ from routers.auth import auth
 from routers.auth import auth
 from routers.auth.authService import verify_jwt_token
 
+description = """
+😎
+"""
 
-app = FastAPI()
+app = FastAPI(title="ZHAW-GPT API", description=description)
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 

@@ -52,11 +52,50 @@ verification_page = """
 </html>
 """
 
+no_valid_token_page = """
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      body {
+        background-color: #1a1a1a; /* Dark background color */
+        color: #fff; /* White text color */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+        font-family: Arial, sans-serif;
+      }
+      .container {
+        padding: 20px;
+        background-color: #333; /* Dark gray container background */
+        border-radius: 2em;
+        text-align: center;
+      }
+      a {
+        color: #3498db; /* Blue link color */
+        text-decoration: none;
+      }
+      a:hover {
+        text-decoration: underline;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h3>No verification possible</h1>
+    </div>
+  </body>
+</html>
+"""
+
 class VerificationItem():
         def __init__(self, email: str, token: str) -> None:
             self.email = email
             self.token = token
-            self.time = datetime.datetime.utcnow()
 
 @singleton
 class VerificationHandler():
@@ -91,10 +130,8 @@ class VerificationHandler():
                 detail="Can not send verification mail")
         
     def verify_email(self, token: str):
-         
-         for item in self.verification_list:
-            delta_time = datetime.datetime.utcnow() - item.time
-            if item.token == token and delta_time < datetime.timedelta(minutes=10):
+        for item in self.verification_list:
+            if item.token == token:
                 pg = PostgresDB()
                 pg.connect()
 
@@ -107,3 +144,5 @@ class VerificationHandler():
                 pg.disconnect()
 
                 return verification_page
+          
+        return no_valid_token_page

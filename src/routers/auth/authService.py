@@ -80,8 +80,11 @@ def is_user_verified(email) -> bool:
                     WHERE email = %s
                     """, data)
     pg.disconnect()
+
+    if response:
+        return response[0][0]
     
-    return response[0][0]
+    return True
 
 def create_jwt_token(email: str) -> str:
     payload = {
