@@ -1,19 +1,19 @@
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
 from fastapi import HTTPException, status
-from routers.auth.tokenHandler import TokenHandler
-import postgres
+from src.routers.auth.tokenHandler import TokenHandler
+from src.utils.postgres import PostgresDB
+
 import bcrypt
 import jwt
 import os
 
-
 load_dotenv()
 
 token_handler = TokenHandler()
-pg = postgres.PostgresDB()
+pg = PostgresDB()
 
-def is_valid_user_and_password(email: str, password:str) -> bool:
+def is_valid_user_and_password(email: str, password: str) -> bool:
     pg.connect()
 
     data = (email,)

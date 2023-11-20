@@ -1,10 +1,10 @@
 from fastapi import APIRouter, HTTPException, status
 from fastapi.requests import HTTPConnection
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 from pydantic import BaseModel
-from routers.auth.authService import create_jwt_token, create_new_account, is_user_verified, is_valid_user_and_password
-from routers.auth.tokenHandler import TokenHandler
-from routers.auth.verificationHandler import VerificationHandler
+from src.routers.auth.authService import create_jwt_token, create_new_account, is_user_verified, is_valid_user_and_password
+from src.routers.auth.tokenHandler import TokenHandler
+from src.routers.auth.verificationHandler import VerificationHandler
 
 router = APIRouter(prefix="/auth", tags=["Authentification"])
 
@@ -44,6 +44,25 @@ async def login(data: Credential):
         token = create_jwt_token(data.email)
         token_handler.add_token(data.email, token)
         return {"token": token}
+    else:
+        raise HTTPException(status_code=401, detail="Wrong username or password")
+    
+@router.post("/login2/", tags=["Authentification"])
+async def login2(data: Credential):
+
+    if not is_user_verified(data.email):
+        return HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, 
+            detail="E-mail is not verified")
+
+    if is_valid_user_and_password(data.email, data.password):
+        token = create_jwt_token(data.email)
+        token_handler.add_token(data.email, token)
+        content = {"token": token}
+        response = JSONResponse(content=content)
+        response.set_cookie(key="token", value=token)
+        return response
+
     else:
         raise HTTPException(status_code=401, detail="Wrong username or password")
 

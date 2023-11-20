@@ -1,4 +1,4 @@
-from utils.singelton import singleton
+from src.utils.singelton import singleton
 
 @singleton
 class TokenHandler():

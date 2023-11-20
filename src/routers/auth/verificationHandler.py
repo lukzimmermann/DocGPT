@@ -4,9 +4,9 @@ import os
 from secrets import token_urlsafe
 from dotenv import load_dotenv
 from fastapi import HTTPException, status
-from postgres import PostgresDB
-from utils.mail import send_mail
-from utils.singelton import singleton
+from src.utils.postgres import PostgresDB
+from src.utils.mail import send_mail
+from src.utils.singelton import singleton
 
 load_dotenv()
 
