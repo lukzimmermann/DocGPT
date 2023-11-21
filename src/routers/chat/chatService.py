@@ -20,12 +20,12 @@ class DocumentJson:
         self.title = document.name
         self.tags = document.tags[0]
         self.page = document.page
-        self.rating = 4.0 - document.dotProduct * 4.0
+        self.rating = document.dotProduct
         #self.text = document.text
 
-        rating = (4.0 - document.dotProduct * 4.0) * 2
-        if rating > 4: rating = 4
-        self.rating = rating
+        #rating = (4.0 - document.dotProduct * 4.0) * 2
+        #if rating > 4: rating = 4
+        #self.rating = rating
             
 
 class ChatModel:
